@@ -1,4 +1,4 @@
-FROM tomcat:8.0-alpine
-COPY HelloWorld.war /usr/local/tomcat/webapps/ROOT.war
-EXPOSE 8080
-CMD ["catalina.sh", "run"]
+FROM public.ecr.aws/docker/library/nginx:latest
+
+# Copy our simple web page into the default Nginx html folder
+COPY index.html /usr/share/nginx/html/index.html

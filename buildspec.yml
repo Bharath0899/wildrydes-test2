@@ -3,28 +3,28 @@ version: 0.2
 phases:
   pre_build:
     commands:
-      - echo Logging in to Amazon ECR...
-      - ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)
-      - REGION=$(aws configure get region)
-      - REPOSITORY_NAME=$IMAGE_REPO_NAME
-      - ECR_URI=${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${REPOSITORY_NAME}
-      - echo "ECR URI: $ECR_URI"
-      - aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com
+      - "echo Logging in to Amazon ECR..."
+      - "ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)"
+      - "REGION=$(aws configure get region)"
+      - "REPOSITORY_NAME=$IMAGE_REPO_NAME"
+      - "ECR_URI=${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${REPOSITORY_NAME}"
+      - "echo ECR URI: $ECR_URI"
+      - "aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com"
 
   build:
     commands:
-      - echo Build started on $(date)
-      - echo Building Docker image...
-      - docker build -t $ECR_URI:latest .
-      - echo Pushing Docker image to ECR...
-      - docker push $ECR_URI:latest
+      - "echo Build started on $(date)"
+      - "echo Building Docker image..."
+      - "docker build -t $ECR_URI:latest ."
+      - "echo Pushing Docker image to ECR..."
+      - "docker push $ECR_URI:latest"
 
   post_build:
     commands:
-      - echo Writing imagedefinitions.json for ECS deployment...
-      - printf '[{"name":"helloworld","imageUri":"%s"}]' $ECR_URI:latest > imagedefinitions.json
-      - cat imagedefinitions.json
-      - echo Build completed on $(date)
+      - "echo Writing imagedefinitions.json for ECS deployment..."
+      - "printf '[{\"name\":\"helloworld\",\"imageUri\":\"%s\"}]' $ECR_URI:latest > imagedefinitions.json"
+      - "cat imagedefinitions.json"
+      - "echo Build completed on $(date)"
 
 artifacts:
   files:

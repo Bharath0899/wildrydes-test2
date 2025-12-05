@@ -1,0 +1,32 @@
+version: 0.2
+
+env:
+  variables:
+    IMAGE_TAG: "latest"
+    IMAGE_REPO_NAME: "wildrydes-test2-helloworld"
+
+phases:
+  install:
+    runtime-versions:
+      docker: 20
+    commands:
+      - echo "== Install phase =="
+      - chmod +x install.sh
+      - ./install.sh
+  build:
+    commands:
+      - echo "== Build phase =="
+      - chmod +x build.sh
+      - ./build.sh
+      - echo "Tagging and pushing image to ECR"
+      - ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+      - REGION=$(aws configure get region)
+      - ECR_URI="${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
+      - docker tag helloworld:v1 ${ECR_URI}:${IMAGE_TAG}
+      - aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com
+      - docker push ${ECR_URI}:${IMAGE_TAG}
+      - printf '[{\"name\":\"helloworld\",\"imageUri\":\"%s\"}]\n' "${ECR_URI}:${IMAGE_TAG}" > imagedefinitions.json
+
+artifacts:
+  files:
+    - imagedefinitions.json
